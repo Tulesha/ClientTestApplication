@@ -1,0 +1,52 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+  
+  <Style Selector="TextBlock">
+    <Setter Property="FontFamily" Value="Sans Pro"/>
+    <Setter Property="FontSize" Value="15"/>
+  </Style>
+
+  <Style Selector="CheckBox">
+    <Setter Property="FontFamily" Value="Sans Pro"/>
+    <Setter Property="FontSize" Value="15"/>  
+  </Style>
+
+  <Style Selector="TextBox">
+    <Setter Property="FontFamily" Value="Sans Pro"/>
+    <Setter Property="FontSize" Value="15"/>
+  </Style>
+
+  <Style Selector="Button">
+    <Setter Property="FontFamily" Value="Sans Pro"/>
+    <Setter Property="FontSize" Value="15"/>
+  </Style>
+
+  <Style Selector="TabItem">
+    <Setter Property="FontFamily" Value="Sans Pro"/>
+    <Setter Property="FontSize" Value="30"/>
+  </Style>
+  
+  <Style Selector="TextBlock.H1">
+    <Setter Property="FontSize" Value="35"/>
+    <Setter Property="FontFamily" Value="Sans Pro"/>
+  </Style>
+
+  <Style Selector="TextBlock.Date">
+    <Setter Property="FontStyle" Value="Italic"/>
+    <Setter Property="FontFamily" Value="Sans Pro"/>
+  </Style>
+
+  <Style>
+    <Style.Resources>
+      <StreamGeometry x:Key="info_regular">M14,2 C20.6274,2 26,7.37258 26,14 C26,20.6274 20.6274,26 14,26 C7.37258,26 2,20.6274 2,14 C2,7.37258 7.37258,2 14,2 Z M14,3.5 C8.20101,3.5 3.5,8.20101 3.5,14 C3.5,19.799 8.20101,24.5 14,24.5 C19.799,24.5 24.5,19.799 24.5,14 C24.5,8.20101 19.799,3.5 14,3.5 Z M14,11 C14.3796833,11 14.6934889,11.2821653 14.7431531,11.6482323 L14.75,11.75 L14.75,19.25 C14.75,19.6642 14.4142,20 14,20 C13.6203167,20 13.3065111,19.7178347 13.2568469,19.3517677 L13.25,19.25 L13.25,11.75 C13.25,11.3358 13.5858,11 14,11 Z M14,7 C14.5523,7 15,7.44772 15,8 C15,8.55228 14.5523,9 14,9 C13.4477,9 13,8.55228 13,8 C13,7.44772 13.4477,7 14,7 Z</StreamGeometry>
+      <StreamGeometry x:Key="send_regular">M3.78963301,2.77233335 L24.8609339,12.8499121 C25.4837277,13.1477699 25.7471402,13.8941055 25.4492823,14.5168992 C25.326107,14.7744476 25.1184823,14.9820723 24.8609339,15.1052476 L3.78963301,25.1828263 C3.16683929,25.4806842 2.42050372,25.2172716 2.12264586,24.5944779 C1.99321184,24.3238431 1.96542524,24.015685 2.04435886,23.7262618 L4.7030903,13.9775798 L2.04435886,4.22889788 C1.8627142,3.56286745 2.25538645,2.87569101 2.92141688,2.69404635 C3.21084015,2.61511273 3.51899823,2.64289932 3.78963301,2.77233335 Z M3.63522914,4.36121177 L6.058,13.249 L17,13.25 C17.3796958,13.25 17.693491,13.5321539 17.7431534,13.8982294 L17.75,14 C17.75,14.3796958 17.4678461,14.693491 17.1017706,14.7431534 L17,14.75 L6.046,14.749 L3.63522914,23.5939479 L23.7421805,13.9775798 L3.63522914,4.36121177 Z</StreamGeometry>
+      <StreamGeometry x:Key="add_circle_regular">M14,2 C20.627417,2 26,7.372583 26,14 C26,20.627417 20.627417,26 14,26 C7.372583,26 2,20.627417 2,14 C2,7.372583 7.372583,2 14,2 Z M14,3.5 C8.20101013,3.5 3.5,8.20101013 3.5,14 C3.5,19.7989899 8.20101013,24.5 14,24.5 C19.7989899,24.5 24.5,19.7989899 24.5,14 C24.5,8.20101013 19.7989899,3.5 14,3.5 Z M14,8 C14.4142136,8 14.75,8.33578644 14.75,8.75 L14.75,13.25 L19.25,13.25 C19.6642136,13.25 20,13.5857864 20,14 C20,14.4142136 19.6642136,14.75 19.25,14.75 L14.75,14.75 L14.75,19.25 C14.75,19.6642136 14.4142136,20 14,20 C13.5857864,20 13.25,19.6642136 13.25,19.25 L13.25,14.75 L8.75,14.75 C8.33578644,14.75 8,14.4142136 8,14 C8,13.5857864 8.33578644,13.25 8.75,13.25 L13.25,13.25 L13.25,8.75 C13.25,8.33578644 13.5857864,8 14,8 Z</StreamGeometry>
+    </Style.Resources>
+  </Style>
+
+</Styles>

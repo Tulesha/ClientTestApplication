@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:ClientTestApplication.Models.ChatMessages"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
+             x:Class="ClientTestApplication.Views.ClientChatView">
+  <StackPanel>
+    <TextBlock Classes="H1">Чат</TextBlock>
+    <Button 
+      HorizontalAlignment="Right"
+      Command="{Binding ConnectCommand}" 
+      Content="{Binding ConnectDisconnect}" />
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Height="450">
+      <ItemsControl 
+             Margin="20"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             Items="{Binding Messages}">
+        <ItemsControl.DataTemplates>
+
+          <DataTemplate DataType="{x:Type local:IncommingMessage}">
+            <Border
+              Background="DarkSlateGray"
+              HorizontalAlignment="Left"
+              CornerRadius="4"
+              Padding="4"
+              Margin="5"
+              MaxWidth="500">
+              <TextBlock
+                Text="{Binding MessageContent}"
+                TextWrapping="Wrap"/>
+            </Border>
+          </DataTemplate>
+
+          <DataTemplate DataType="{x:Type local:OutGoingMessage}">
+            <Border
+              Background="DarkSlateBlue"
+              HorizontalAlignment="Right"
+              CornerRadius="4"
+              Padding="4"
+              Margin="5"
+              MaxWidth="500">
+              <TextBlock
+                Text="{Binding MessageContent}"
+                TextWrapping="Wrap"/>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.DataTemplates>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <Grid 
+      RowDefinitions="*, Auto" 
+      ColumnDefinitions="*, Auto">
+      <TextBox 
+        Grid.Row="0" 
+        Grid.Column="0" 
+        Text="{Binding InputMessage}" 
+        IsEnabled="{Binding !EnableChat}" 
+        Watermark="Введите сообщение">
+        <TextBox.KeyBindings>
+          <KeyBinding 
+            Gesture="Enter" 
+            Command="{Binding SendMessageCommand}"/>
+        </TextBox.KeyBindings>
+      </TextBox>
+      <Button IsEnabled="{Binding !EnableChat}" 
+              Command="{Binding SendMessageCommand}" 
+              Grid.Row="0" 
+              Grid.Column="1">
+        <PathIcon 
+          Grid.Row="0" 
+          HorizontalAlignment="Right" 
+          Data="{StaticResource send_regular}"/>
+      </Button>
+    </Grid>
+
+
+  </StackPanel>
+</UserControl>
