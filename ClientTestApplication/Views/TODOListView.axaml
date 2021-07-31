@@ -2,32 +2,98 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:ClientTestApplication.Models.TodoItem"
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
              x:Class="ClientTestApplication.Views.TODOListView">
 
   <StackPanel>
     <TextBlock Classes="H1">Список дел</TextBlock>
 
-    <ScrollViewer Height="480" VerticalScrollBarVisibility="Auto" >
+    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+      <Button
+        Command="{Binding SortItems}"
+        CommandParameter="up">
+        <PathIcon
+          Data="{StaticResource arrow_up_regular}"/>
+      </Button>
+      <Button
+        Command="{Binding SortItems}"
+        CommandParameter="down">
+        <PathIcon
+          Data="{StaticResource arrow_down_regular}"/>
+      </Button>
+    </StackPanel>
+
+    <ScrollViewer Height="450" VerticalScrollBarVisibility="Auto" >
       <ItemsControl Margin="20" Items="{Binding TodoItems}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <StackPanel Orientation="Horizontal">
-              <CheckBox 
-                IsChecked="{Binding IsChecked}" 
-                Content="{Binding Description}"/>
-              <TextBlock 
-                Classes="Date" 
-                Margin="15,0,0,0" 
-                Text="{Binding DueDateString}"/>
-            </StackPanel>
+        
+        <ItemsControl.DataTemplates>
+          <DataTemplate DataType="{x:Type local:NotDueTodoItem}">
+            <Border
+              Background="DarkSlateGray"
+              CornerRadius="4"
+              Padding="4"
+              Margin="5">
+              
+              <Panel>
+                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                  <CheckBox
+                  IsChecked="{Binding IsChecked}"
+                  Content="{Binding Description}"
+                  Command="{Binding $parent[UserControl].DataContext.ClickChecked}"
+                  CommandParameter="{Binding RelativeSource={RelativeSource DataContext}}"/>
+                  <TextBlock
+                    Classes="Date"
+                    Margin="15,0,0,0"
+                    Text="{Binding DueDateString}"/>
+                </StackPanel>
+
+                <Button
+                  HorizontalAlignment="Right"
+                  Command="{Binding $parent[UserControl].DataContext.ClickDeleteItem}"
+                  CommandParameter="{Binding RelativeSource={RelativeSource DataContext}}">
+                  <PathIcon Data="{StaticResource delete_regular}"/>
+                </Button>
+              </Panel>
+            </Border>
           </DataTemplate>
-        </ItemsControl.ItemTemplate>
+
+          <DataTemplate DataType="{x:Type local:DueTodoItem}">
+            <Border
+              Background="DarkRed"
+              CornerRadius="4"
+              Padding="4"
+              Margin="5">
+
+              <Panel>
+                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                  <CheckBox
+                  IsChecked="{Binding IsChecked}"
+                  Content="{Binding Description}"
+                  Command="{Binding $parent[UserControl].DataContext.ClickChecked}"
+                  CommandParameter="{Binding RelativeSource={RelativeSource DataContext}}"/>
+                  <TextBlock
+                    Classes="Date"
+                    Margin="15,0,0,0"
+                    Text="{Binding DueDateString}"/>
+                </StackPanel>
+
+                <Button 
+                  HorizontalAlignment="Right" 
+                  Command="{Binding $parent[UserControl].DataContext.ClickDeleteItem}" 
+                  CommandParameter="{Binding RelativeSource={RelativeSource DataContext}}">
+                  <PathIcon Data="{StaticResource delete_regular}"/>
+                </Button>
+              </Panel>
+              
+            </Border>
+          </DataTemplate>
+        </ItemsControl.DataTemplates>
+      
       </ItemsControl>
     </ScrollViewer>
     
     <Grid
-      RowDefinitions="*, Auto"
       ColumnDefinitions="*, Auto, Auto">
       <TextBox
         Grid.Row="0"

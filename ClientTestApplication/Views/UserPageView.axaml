@@ -15,11 +15,10 @@
       </ExperimentalAcrylicBorder.Material>
     </ExperimentalAcrylicBorder>
 
-    <Grid Margin="10" RowDefinitions="Auto, *">
-      <TabControl Grid.Row="0">
+      <TabControl Margin="5">
 
         <!--Главная страница-->
-        <TabItem Grid.Row="1">
+        <TabItem>
           <TabItem.Header>Главная страница</TabItem.Header>
           <UserControl Content="{Binding MainPageControl}"/>
         </TabItem>
@@ -42,10 +41,6 @@
         </TabItem>
 
       </TabControl>
-    </Grid>
-
-    <Panel Margin="20">
-      
-    </Panel>
+    
   </Panel>
 </UserControl>

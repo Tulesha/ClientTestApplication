@@ -8,7 +8,7 @@ namespace ClientTestApplication.ViewModels
         {
             ChatUserControl = new ClientChatViewModel(userName);
             MainPageControl = new MainPageViewModel(userName);
-            TodoListControl = new TODOListViewModel();
+            TodoListControl = new TODOListViewModel(userName);
         }
 
         private ViewModelBase chatUserControl;

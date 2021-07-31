@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
         Width="1200" Height="650"
         x:Class="ClientTestApplication.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Application-logo.ico"
         Title="ClientTestApplication"
         
         

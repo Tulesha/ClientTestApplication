@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using ClientTestApplication.Models.TodoItem;
 using System.Windows.Input;
 using ReactiveUI;
+
+using ClientTestApplication.Models.TodoItem;
+using ClientTestApplication.Services;
+using System.Linq;
 
 namespace ClientTestApplication.ViewModels
 {
     class TODOListViewModel : ViewModelBase
     {
-        public TODOListViewModel()
+        public TODOListViewModel(string userName)
         {
-            TodoItems = new ObservableCollection<TodoItem>();
+            TodoItems = XmlTodoItem.GetTodoItems(userName);
 
             var addEnable = this.WhenAnyValue(
                 x => x.TodoItemTextBox,
@@ -19,9 +22,67 @@ namespace ClientTestApplication.ViewModels
 
             AddTodoItem = ReactiveCommand.Create(() =>
             {
-                TodoItems.Add(new TodoItem { Description = TodoItemTextBox, DueDate = DueDate });
+                if (DueDate < DateTime.Today)
+                {
+                    var todoItem = new DueTodoItem
+                    {
+                        ID = System.Guid.NewGuid().ToString(), 
+                        Description = TodoItemTextBox, 
+                        DueDate = DueDate 
+                    };
+
+                    TodoItems.Add(todoItem);
+                    XmlTodoItem.AddTodoItem(todoItem);
+                }
+                else
+                {
+                    var todoItem = new NotDueTodoItem { 
+                        ID = System.Guid.NewGuid().ToString(), 
+                        Description = TodoItemTextBox, 
+                        DueDate = DueDate 
+                    };
+
+                    TodoItems.Add(todoItem);
+                    XmlTodoItem.AddTodoItem(todoItem);
+                }
                 TodoItemTextBox = string.Empty;
             }, addEnable);
+
+            ClickChecked = ReactiveCommand.Create((TodoItem item) =>
+            {
+                XmlTodoItem.SetCheck(item);
+            });
+
+
+            ClickDeleteItem = ReactiveCommand.Create((TodoItem item) =>
+            {
+                TodoItems.Remove(item);
+                XmlTodoItem.DeleteItem(item);
+            });
+
+            SortItems = ReactiveCommand.Create((string direction) =>
+            {
+                if (direction == "up")
+                {
+                    var sorted = new ObservableCollection<TodoItem>(TodoItems.OrderBy(i => i.DueDate));
+                    TodoItems.Clear();
+
+                    foreach (var item in sorted)
+                    {
+                        TodoItems.Add(item);
+                    }
+                }
+                else
+                {
+                    var sorted = new ObservableCollection<TodoItem>(TodoItems.OrderBy(i => i.DueDate).Reverse());
+                    TodoItems.Clear();
+
+                    foreach (var item in sorted)
+                    {
+                        TodoItems.Add(item);
+                    }
+                }
+            });
         }
 
         private string todoItemTextBox = string.Empty;
@@ -42,5 +103,8 @@ namespace ClientTestApplication.ViewModels
         }
 
         private ICommand AddTodoItem { get; }
+        private ICommand ClickChecked { get; }
+        private ICommand ClickDeleteItem { get; }
+        private ICommand SortItems { get; }
     }
 }
