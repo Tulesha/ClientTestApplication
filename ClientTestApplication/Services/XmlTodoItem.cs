@@ -26,7 +26,7 @@ namespace ClientTestApplication.Services
 
                     if (description != null && id != null && isCheck != null && dueDate != null)
                     {
-                        if (((DateTimeOffset)dueDate) < DateTime.Today)
+                        if (((DateTimeOffset)dueDate) < DateTime.Today && ((bool)isCheck) == false)
                         {
                             todoItems.Add(new DueTodoItem { 
                                 ID = id.Value,

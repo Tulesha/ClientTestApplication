@@ -33,6 +33,18 @@
                 TextWrapping="Wrap"/>
             </Border>
           </DataTemplate>
+          
+          <DataTemplate DataType="{x:Type local:IncommingImage}">
+            <Border
+              Background="DarkSlateGray"
+              HorizontalAlignment="Left"
+              CornerRadius="4"
+              Padding="4"
+              Margin="5"
+              MaxWidth="500">
+              <Image Source="{Binding Source}" Stretch="Uniform" Height="100"/>
+            </Border>
+          </DataTemplate>
 
           <DataTemplate DataType="{x:Type local:OutGoingMessage}">
             <Border
@@ -47,16 +59,34 @@
                 TextWrapping="Wrap"/>
             </Border>
           </DataTemplate>
+
+          <DataTemplate DataType="{x:Type local:OutGoingImage}">
+            <Border
+              Background="DarkSlateBlue"
+              HorizontalAlignment="Right"
+              CornerRadius="4"
+              Padding="4"
+              Margin="5"
+              MaxWidth="500">
+              <Image Source="{Binding Source}" Stretch="Uniform" Height="150"/>
+            </Border>
+          </DataTemplate>
         </ItemsControl.DataTemplates>
       </ItemsControl>
+      
     </ScrollViewer>
 
-    <Grid 
-      RowDefinitions="*, Auto" 
-      ColumnDefinitions="*, Auto">
+    <Grid  
+      ColumnDefinitions="Auto, *, Auto">
+      <Button
+        IsEnabled="{Binding !EnableChat}"
+        Command="{Binding PickPictureCommand}"
+        CommandParameter="{Binding $parent[Window]}"
+        Grid.Column="0">
+        <PathIcon Data="{StaticResource image_add_regular}"/>
+      </Button>
       <TextBox 
-        Grid.Row="0" 
-        Grid.Column="0" 
+        Grid.Column="1" 
         Text="{Binding InputMessage}" 
         IsEnabled="{Binding !EnableChat}" 
         Watermark="Введите сообщение">
@@ -67,12 +97,9 @@
         </TextBox.KeyBindings>
       </TextBox>
       <Button IsEnabled="{Binding !EnableChat}" 
-              Command="{Binding SendMessageCommand}" 
-              Grid.Row="0" 
-              Grid.Column="1">
+              Command="{Binding SendMessageCommand}"
+              Grid.Column="2">
         <PathIcon 
-          Grid.Row="0" 
-          HorizontalAlignment="Right" 
           Data="{StaticResource send_regular}"/>
       </Button>
     </Grid>

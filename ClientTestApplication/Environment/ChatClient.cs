@@ -16,7 +16,9 @@ namespace ClientTestApplication.Environments
         private NetworkStream stream;
 
         public delegate void PrintMessageHandler(string message, HorizontalAlignment side);
+        public delegate void PrintImageHandler(byte[] imageData, HorizontalAlignment side);
         public event PrintMessageHandler PrintMessage;
+        public event PrintImageHandler PrintImage;
 
         public ChatClient(string name, string host="127.0.0.1", int port=8888)
         {
@@ -58,6 +60,13 @@ namespace ClientTestApplication.Environments
             PrintMessage($"Вы: {message}", HorizontalAlignment.Right);
         }
 
+        public void SendImage(byte[] data)
+        {
+            stream.Write(data, 0, data.Length);
+
+            PrintImage(data, HorizontalAlignment.Right);
+        }
+
         private void ReceiveMessage()
         {
             while (true)
@@ -70,13 +79,20 @@ namespace ClientTestApplication.Environments
                     do
                     {
                         bytes = stream.Read(data, 0, data.Length);
-                        builder.Append(Encoding.Unicode.GetString(data, 0, data.Length));
+                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
                     }
                     while (stream.DataAvailable);
 
                     string receiveMessage = builder.ToString();
 
-                    PrintMessage(receiveMessage.Replace("\0", string.Empty), HorizontalAlignment.Left);
+                    if (receiveMessage.Length < 1000)
+                    {
+                        PrintMessage(receiveMessage, HorizontalAlignment.Left);
+                    }
+                    else
+                    {
+                        PrintImage(Encoding.Unicode.GetBytes(receiveMessage), HorizontalAlignment.Left);
+                    }
                 }
                 catch
                 {

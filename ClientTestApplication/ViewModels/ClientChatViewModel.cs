@@ -1,9 +1,14 @@
 ﻿using Avalonia.Layout;
+using Avalonia.Controls;
 using ClientTestApplication.Environments;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using ClientTestApplication.Models.ChatMessages;
+using System;
+using System.IO;
+using Avalonia.Media.Imaging;
+using System.Threading.Tasks;
 
 namespace ClientTestApplication.ViewModels
 {
@@ -16,6 +21,7 @@ namespace ClientTestApplication.ViewModels
 
             ChatClient chatClient = new ChatClient(userName);
             chatClient.PrintMessage += ChatClient_PrintMessage;
+            chatClient.PrintImage += ChatClient_PrintImage;
 
             ConnectCommand = ReactiveCommand.Create(() =>
             {
@@ -44,6 +50,44 @@ namespace ClientTestApplication.ViewModels
                     InputMessage = string.Empty;
                 }
             });
+
+            PickPictureCommand = ReactiveCommand.Create(async (Window window) =>
+            {
+                OpenFileDialog dialog = new OpenFileDialog();
+                dialog.Filters.Add(new FileDialogFilter() { Name = "Выберите фото", Extensions = { "jpg" } });
+                string[] result = await dialog.ShowAsync(window);
+
+                if (result.Length != 0)
+                {
+                    FileName = string.Join(" ", result);
+
+                    Bitmap bitmap = new Bitmap(FileName);
+                    MemoryStream memoryStream = new MemoryStream();
+
+                    bitmap.Save(memoryStream);
+
+                    chatClient.SendImage(memoryStream.ToArray());
+                }
+            });
+        }
+
+        private async void ChatClient_PrintImage(byte[] imageData, HorizontalAlignment side)
+        {
+            if (side == HorizontalAlignment.Left)
+            {
+                await using (var stream = new MemoryStream(imageData))
+                {
+                    // NullRefException
+                    Messages.Add(new IncommingImage { Source = await Task.Run(() => Bitmap.DecodeToWidth(stream, 400)) });
+                }
+            }
+            else
+            {
+                await using (var stream = new MemoryStream(imageData))
+                {
+                    Messages.Add(new OutGoingImage { Source =  await Task.Run(() => Bitmap.DecodeToWidth(stream, 400)) });
+                }
+            }
         }
 
         private void ChatClient_PrintMessage(string message, HorizontalAlignment side)
@@ -80,7 +124,10 @@ namespace ClientTestApplication.ViewModels
             set => this.RaiseAndSetIfChanged(ref connectDisconnect, value);
         }
 
+        private string FileName { get; set; }
+
         private ICommand ConnectCommand { get; }
         private ICommand SendMessageCommand { get; }
+        private ICommand PickPictureCommand { get; }
     }
 }
