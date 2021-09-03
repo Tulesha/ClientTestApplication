@@ -3,6 +3,9 @@ using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using ChatMessages;
 
 namespace ClientTestApplication.Environments
 {
@@ -15,10 +18,10 @@ namespace ClientTestApplication.Environments
         Thread receiveThread;
         private NetworkStream stream;
 
-        public delegate void PrintMessageHandler(string message, HorizontalAlignment side);
-        public delegate void PrintImageHandler(byte[] imageData, HorizontalAlignment side);
-        public event PrintMessageHandler PrintMessage;
-        public event PrintImageHandler PrintImage;
+        public delegate void PrintTextMessageHandler(TextMessage message);
+        public delegate void PrintImageMessageHandler(ImageMessage image);
+        public event PrintTextMessageHandler PrintTextMessage;
+        public event PrintImageMessageHandler PrintImageMessage;
 
         public ChatClient(string name, string host="127.0.0.1", int port=8888)
         {
@@ -35,8 +38,12 @@ namespace ClientTestApplication.Environments
                 client.Connect(host, port);
                 stream = client.GetStream();
 
-                string message = userName;
-                byte[] data = Encoding.Unicode.GetBytes(message);
+                using MemoryStream ms = new MemoryStream();
+                BinaryFormatter formatter = new BinaryFormatter();
+
+                var message = new IncommingTextMessage { Content = userName };
+                formatter.Serialize(ms, message);
+                byte[] data = ms.ToArray();
                 stream.Write(data, 0, data.Length);
                 
                 receiveThread = new Thread(new ThreadStart(ReceiveMessage));
@@ -44,7 +51,7 @@ namespace ClientTestApplication.Environments
                 receiveThread.Start();
 
                 // Добро пожаловать 
-                PrintMessage("Добро пожаловать ", HorizontalAlignment.Left);
+                PrintTextMessage(new IncommingTextMessage { Content = "Добро пожаловать" });
             }
             catch (Exception ex)
             {
@@ -52,19 +59,38 @@ namespace ClientTestApplication.Environments
             }
         }
 
-        public void SendMessage(string message)
+        public void SendMessage(TextMessage message)
         {
-            byte[] data = Encoding.Unicode.GetBytes(message);
+            BinaryFormatter formatter = new BinaryFormatter();
+            using MemoryStream ms = new MemoryStream();
+
+            formatter.Serialize(ms, new IncommingTextMessage { Content = message.Content });
+
+            byte[] data = ms.ToArray();
             stream.Write(data, 0, data.Length);
 
-            PrintMessage($"Вы: {message}", HorizontalAlignment.Right);
+            message.Content = $"Вы: {message.Content}";
+            PrintTextMessage(message);
         }
 
-        public void SendImage(byte[] data)
+        public void SendImage(ImageMessage image)
         {
+            BinaryFormatter formatter = new BinaryFormatter();
+            using MemoryStream ms = new MemoryStream();
+
+            try
+            {
+                formatter.Serialize(ms, new IncommingImageMessage { SystemBitmap = image.SystemBitmap });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            byte[] data = ms.ToArray();
             stream.Write(data, 0, data.Length);
 
-            PrintImage(data, HorizontalAlignment.Right);
+            PrintImageMessage(image);
         }
 
         private void ReceiveMessage()
@@ -74,28 +100,32 @@ namespace ClientTestApplication.Environments
                 try
                 {
                     byte[] data = new byte[64];
-                    StringBuilder builder = new StringBuilder();
+                    using MemoryStream ms = new MemoryStream();
+                    BinaryFormatter formatter = new BinaryFormatter();
                     int bytes = 0;
                     do
                     {
                         bytes = stream.Read(data, 0, data.Length);
-                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                        ms.Write(data, 0, bytes);
                     }
                     while (stream.DataAvailable);
 
-                    string receiveMessage = builder.ToString();
+                    ms.Position = 0;
 
-                    if (receiveMessage.Length < 1000)
+                    var obj = formatter.Deserialize(ms);
+                    if (obj as TextMessage != null)
                     {
-                        PrintMessage(receiveMessage, HorizontalAlignment.Left);
+                        PrintTextMessage((IncommingTextMessage)obj);
                     }
-                    else
+                    else if (obj as ImageMessage != null)
                     {
-                        PrintImage(Encoding.Unicode.GetBytes(receiveMessage), HorizontalAlignment.Left);
+                        var image = (IncommingImageMessage)obj;
+                        PrintImageMessage(image);
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Console.WriteLine(e.Message);
                     Console.WriteLine("Подключение прервано");
                     Disconnect();
                     break;

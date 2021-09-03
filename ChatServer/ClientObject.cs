@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net.Sockets;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using ChatMessages;
 
 namespace ChatServer
 {
-    public class ClientObject
+    class ClientObject
     {
         protected internal string Id { get; private set; }
         protected internal NetworkStream Stream { get; private set; }
@@ -29,28 +28,40 @@ namespace ChatServer
             {
                 Stream = client.GetStream();
                 // получаем имя пользователя
-                string message = GetMessage();
-                userName = message;
+                var messageObj = GetMessage();
+                var textMessage = (TextMessage)messageObj;
+                userName = textMessage.Content;
 
-                message = userName + " вошел в чат";
+                textMessage.Content = userName + " вошел в чат";
                 // посылаем сообщение о входе в чат всем подключенным пользователям
-                server.BroadcastMessage(message, this.Id);
-                Console.WriteLine(message);
+                server.BroadcastMessage(textMessage, this.Id);
+
+                Console.WriteLine(textMessage.Content);
                 // в бесконечном цикле получаем сообщения от клиента
                 while (true)
                 {
                     try
                     {
-                        message = GetMessage();
-                        message = String.Format("{0}: {1}", userName, message);
-                        Console.WriteLine(message);
-                        server.BroadcastMessage(message, this.Id);
+                        messageObj = GetMessage();
+                        if (messageObj as TextMessage != null)
+                        {
+                            textMessage = (TextMessage)messageObj;
+                            textMessage.Content = String.Format("{0}: {1}", userName, textMessage.Content);
+                            Console.WriteLine(textMessage.Content);
+                            server.BroadcastMessage(textMessage, this.Id);
+                        }
+                        else if (messageObj as ImageMessage != null)
+                        {
+                            var imageMessage = (ImageMessage)messageObj;
+                            server.BroadcastMessage(imageMessage, this.Id);
+                            Console.WriteLine(imageMessage.SystemBitmap.Size);
+                        }
                     }
                     catch (Exception e)
                     {
-                        message = String.Format("{0}: покинул чат", userName);
-                        Console.WriteLine(message);
-                        server.BroadcastMessage(message, this.Id);
+                        textMessage.Content = String.Format("{0}: покинул чат", userName);
+                        Console.WriteLine(textMessage.Content);
+                        server.BroadcastMessage(textMessage, this.Id);
                         break;
                     }
                 }
@@ -68,22 +79,24 @@ namespace ChatServer
         }
 
         // чтение входящего сообщения и преобразование в строку
-        private string GetMessage()
+        private object GetMessage()
         {
             byte[] data = new byte[64]; // буфер для получаемых данных
-            StringBuilder builder = new StringBuilder();
-            int bytes = 0;
+            using MemoryStream ms = new MemoryStream();
+            BinaryFormatter formatter = new BinaryFormatter();
+            int bytes;
             do
             {
                 bytes = Stream.Read(data, 0, data.Length);
                 if (bytes == 0)
                     throw new Exception("Пользователь вышел");
-
-                builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                ms.Write(data, 0, bytes);
             }
             while (Stream.DataAvailable);
 
-            return builder.ToString();
+            ms.Position = 0;
+
+            return formatter.Deserialize(ms);
         }
 
         // закрытие подключения

@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:ClientTestApplication.Models.ChatMessages"
+             xmlns:local="clr-namespace:ChatMessages;assembly=ChatMessages"
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
              x:Class="ClientTestApplication.Views.ClientChatView">
   <StackPanel>
@@ -20,7 +20,7 @@
              Items="{Binding Messages}">
         <ItemsControl.DataTemplates>
 
-          <DataTemplate DataType="{x:Type local:IncommingMessage}">
+          <DataTemplate DataType="{x:Type local:IncommingTextMessage}">
             <Border
               Background="DarkSlateGray"
               HorizontalAlignment="Left"
@@ -29,12 +29,12 @@
               Margin="5"
               MaxWidth="500">
               <TextBlock
-                Text="{Binding MessageContent}"
+                Text="{Binding Content}"
                 TextWrapping="Wrap"/>
             </Border>
           </DataTemplate>
           
-          <DataTemplate DataType="{x:Type local:IncommingImage}">
+          <DataTemplate DataType="{x:Type local:IncommingImageMessage}">
             <Border
               Background="DarkSlateGray"
               HorizontalAlignment="Left"
@@ -42,11 +42,11 @@
               Padding="4"
               Margin="5"
               MaxWidth="500">
-              <Image Source="{Binding Source}" Stretch="Uniform" Height="100"/>
+              <Image Source="{Binding AvaloniaBitmap}" Stretch="Uniform" Height="150"/>
             </Border>
           </DataTemplate>
 
-          <DataTemplate DataType="{x:Type local:OutGoingMessage}">
+          <DataTemplate DataType="{x:Type local:OutGoingTextMessage}">
             <Border
               Background="DarkSlateBlue"
               HorizontalAlignment="Right"
@@ -55,12 +55,12 @@
               Margin="5"
               MaxWidth="500">
               <TextBlock
-                Text="{Binding MessageContent}"
+                Text="{Binding Content}"
                 TextWrapping="Wrap"/>
             </Border>
           </DataTemplate>
 
-          <DataTemplate DataType="{x:Type local:OutGoingImage}">
+          <DataTemplate DataType="{x:Type local:OutGoingImageMessage}">
             <Border
               Background="DarkSlateBlue"
               HorizontalAlignment="Right"
@@ -68,7 +68,7 @@
               Padding="4"
               Margin="5"
               MaxWidth="500">
-              <Image Source="{Binding Source}" Stretch="Uniform" Height="150"/>
+              <Image Source="{Binding AvaloniaBitmap}" Stretch="Uniform" Height="150"/>
             </Border>
           </DataTemplate>
         </ItemsControl.DataTemplates>

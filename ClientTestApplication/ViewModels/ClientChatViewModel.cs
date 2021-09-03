@@ -4,10 +4,9 @@ using ClientTestApplication.Environments;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using ClientTestApplication.Models.ChatMessages;
-using System;
+using ChatMessages;
 using System.IO;
-using Avalonia.Media.Imaging;
+using System.Drawing;
 using System.Threading.Tasks;
 
 namespace ClientTestApplication.ViewModels
@@ -20,8 +19,8 @@ namespace ClientTestApplication.ViewModels
 
 
             ChatClient chatClient = new ChatClient(userName);
-            chatClient.PrintMessage += ChatClient_PrintMessage;
-            chatClient.PrintImage += ChatClient_PrintImage;
+            chatClient.PrintTextMessage += ChatClient_PrintTextMessage;
+            chatClient.PrintImageMessage += ChatClient_PrintImageMessage;
 
             ConnectCommand = ReactiveCommand.Create(() =>
             {
@@ -46,7 +45,7 @@ namespace ClientTestApplication.ViewModels
             {
                 if (InputMessage != string.Empty)
                 {
-                    chatClient.SendMessage(InputMessage);
+                    chatClient.SendMessage(new OutGoingTextMessage { Content = InputMessage });
                     InputMessage = string.Empty;
                 }
             });
@@ -57,50 +56,32 @@ namespace ClientTestApplication.ViewModels
                 dialog.Filters.Add(new FileDialogFilter() { Name = "Выберите фото", Extensions = { "jpg" } });
                 string[] result = await dialog.ShowAsync(window);
 
+
                 if (result.Length != 0)
                 {
                     FileName = string.Join(" ", result);
 
-                    Bitmap bitmap = new Bitmap(FileName);
-                    MemoryStream memoryStream = new MemoryStream();
-
-                    bitmap.Save(memoryStream);
-
-                    chatClient.SendImage(memoryStream.ToArray());
+                    MemoryStream memoryStream = new MemoryStream(File.ReadAllBytes(FileName));
+                    chatClient.SendImage(new OutGoingImageMessage { SystemBitmap = new Bitmap(memoryStream) });
                 }
             });
         }
 
-        private async void ChatClient_PrintImage(byte[] imageData, HorizontalAlignment side)
+        private void ChatClient_PrintTextMessage(TextMessage message)
         {
-            if (side == HorizontalAlignment.Left)
-            {
-                await using (var stream = new MemoryStream(imageData))
-                {
-                    // NullRefException
-                    Messages.Add(new IncommingImage { Source = await Task.Run(() => Bitmap.DecodeToWidth(stream, 400)) });
-                }
-            }
-            else
-            {
-                await using (var stream = new MemoryStream(imageData))
-                {
-                    Messages.Add(new OutGoingImage { Source =  await Task.Run(() => Bitmap.DecodeToWidth(stream, 400)) });
-                }
-            }
+            Messages.Add(message);
         }
 
-        private void ChatClient_PrintMessage(string message, HorizontalAlignment side)
+        private async void ChatClient_PrintImageMessage(ImageMessage image)
         {
-            if (side == HorizontalAlignment.Left)
-            {
-                Messages.Add(new IncommingMessage { MessageContent = message });
-            }
-            else
-            {
-                Messages.Add(new OutGoingMessage { MessageContent = message });
-            }
+            using MemoryStream ms = new MemoryStream();
+            image.SystemBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+            ms.Position = 0;
+
+            image.AvaloniaBitmap = await Task.Run(() => Avalonia.Media.Imaging.Bitmap.DecodeToWidth(ms, 400));
+            Messages.Add(image);
         }
+
 
         private string inputMessage = string.Empty;
         private string connectDisconnect = "Подключиться";

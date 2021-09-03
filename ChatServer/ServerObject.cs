@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using ChatMessages;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace ChatServer
 {
-    public class ServerObject
+    class ServerObject
     {
         static TcpListener tcpListener; // сервер для прослушивания
         List<ClientObject> clients = new List<ClientObject>(); // все подключения
@@ -52,9 +54,28 @@ namespace ChatServer
         }
 
         // трансляция сообщения подключенным клиентам
-        protected internal void BroadcastMessage(string message, string id)
+        protected internal void BroadcastMessage(Message message, string id)
         {
-            byte[] data = Encoding.Unicode.GetBytes(message);
+            byte[] data = new byte[0];
+            if (message is TextMessage)
+            {
+                using MemoryStream ms = new MemoryStream();
+                BinaryFormatter formatter = new BinaryFormatter();
+
+                formatter.Serialize(ms, (TextMessage)message);
+
+                data = ms.ToArray();
+            }
+            else if (message is ImageMessage)
+            {
+                using MemoryStream ms = new MemoryStream();
+                BinaryFormatter formatter = new BinaryFormatter();
+
+                formatter.Serialize(ms, (ImageMessage)message);
+
+                data = ms.ToArray();
+            }
+
             for (int i = 0; i < clients.Count; i++)
             {
                 if (clients[i].Id != id) // если id клиента не равно id отправляющего
@@ -62,6 +83,7 @@ namespace ChatServer
                     clients[i].Stream.Write(data, 0, data.Length); //передача данных
                 }
             }
+
         }
         // отключение всех клиентов
         protected internal void Disconnect()
